@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import com.example.demo.shared.LaptopType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 
@@ -8,7 +9,7 @@ import javax.persistence.*;
 @Table(name = "laptops")
 public class Laptop {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "type")
@@ -20,22 +21,46 @@ public class Laptop {
     @Column(name = "processor")
     private String processor;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "employee_id", nullable = false, unique = false, referencedColumnName = "id")
+    public Long getId() {
+        return id;
+    }
+
+    @JsonBackReference
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = Employee.class)
+    @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = false)
     private Employee employeeId;
 
     public Laptop() {super();}
 
-    public Laptop(LaptopType laptopType, String graphicsCard, String processor, Employee employeeId) {
+    public Employee getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Employee employee) {
+        this.employeeId = employee;
+    }
+
+    public Laptop(LaptopType laptopType, String graphicsCard, String processor, Employee employee) {
         this.laptopType = laptopType;
         this.graphicsCard = graphicsCard;
         this.processor = processor;
-        this.employeeId = employeeId;
+        this.employeeId = employee;
+    }
+
+    @Override
+    public String toString() {
+        return "Laptop{" +
+                "id=" + id +
+                ", laptopType=" + laptopType +
+                ", graphicsCard='" + graphicsCard + '\'' +
+                ", processor='" + processor + '\'' +
+                ", employeeId=" + employeeId +
+                '}';
     }
 
     public Boolean validateSelf() {
-        Boolean isGraphicsCard = Boolean.parseBoolean(this.getGraphicsCard());
-        Boolean isProcessor = Boolean.parseBoolean(this.getProcessor());
+        Boolean isGraphicsCard = this.getGraphicsCard() != null && !this.getGraphicsCard().equals("");
+        Boolean isProcessor = this.getProcessor() != null && !this.getProcessor().equals("");
         Boolean isLaptopType = LaptopType.ACER.validateLaptopType(this.getLaptopType());
         return isGraphicsCard && isLaptopType && isProcessor;
     }

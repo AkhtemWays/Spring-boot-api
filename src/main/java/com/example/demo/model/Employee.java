@@ -1,6 +1,9 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -8,6 +11,7 @@ import java.util.List;
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "first_name")
@@ -19,19 +23,30 @@ public class Employee {
     @Column(name = "email")
     private String email;
 
-    @Column
-    @OneToMany(mappedBy = "employeeId")
-    private List<Laptop> laptops;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "employeeId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Laptop> laptops = new ArrayList<>();
 
     public Employee() {
         super();
     }
 
     public Boolean validateSelf() {
-        Boolean isLastName = Boolean.parseBoolean(this.getLastName());
-        Boolean isEmail = Boolean.parseBoolean(this.getEmail());
-        Boolean isFirstName = Boolean.parseBoolean(this.getFirstName());
+        Boolean isLastName = this.getLastName() != null && !this.getLastName().equals("");
+        Boolean isEmail = this.getEmail() != null && !this.getEmail().equals("");
+        Boolean isFirstName = this.getFirstName() != null && !this.getFirstName().equals("");
         return isEmail && isFirstName && isLastName;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", laptops=" + laptops +
+                '}';
     }
 
     public Employee(String firstName, String lastName, String email) {
@@ -71,5 +86,13 @@ public class Employee {
 
     public String getEmail() {
         return email;
+    }
+
+    public List<Laptop> getLaptops() {
+        return this.laptops;
+    }
+
+    public void setLaptops(List<Laptop> laptops) {
+        this.laptops = laptops;
     }
 }

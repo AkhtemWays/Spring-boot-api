@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.DAO.EmployeeDAO;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Employee;
-import com.example.demo.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,19 +13,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
-    @Autowired
-    private EmployeeRepository employeeRepository;
 
     @GetMapping
     public List<Employee> getAllEmployees() {
-        return this.employeeRepository.findAll();
+        return this.employeeDAO.getAllEmployees();
     }
+
+    @Autowired
+    private EmployeeDAO employeeDAO;
 
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployee(@PathVariable("id") Long id) throws ResourceNotFoundException {
-        Employee employee = this.employeeRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found for this id: " + id));
+        Employee employee = this.employeeDAO.getEmployeeById(id);
+        if (employee == null) {
+            throw new ResourceNotFoundException("user not found for this id: " + id);
+        }
         return ResponseEntity.ok().body(employee);
     }
 
@@ -33,7 +35,7 @@ public class EmployeeController {
     public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
         Boolean valid = employee.validateSelf();
         if (valid) {
-            this.employeeRepository.save(employee);
+            this.employeeDAO.createEmployee(employee);
             return ResponseEntity.ok().body(HttpStatus.CREATED);
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
@@ -44,25 +46,25 @@ public class EmployeeController {
                                             @RequestBody Employee employeeDetails) throws ResourceNotFoundException {
         Boolean valid = employeeDetails.validateSelf();
         if (id != null && valid) {
-            Employee employee = employeeRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("user not found for this id: " + id));
-            employee.setEmail(employeeDetails.getEmail());
-            employee.setFirstName(employeeDetails.getFirstName());
-            employee.setLastName(employeeDetails.getLastName());
-            this.employeeRepository.save(employee);
+            this.employeeDAO.updateEmployee(employeeDetails, id);
             return ResponseEntity.ok().body(HttpStatus.OK);
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) throws ResourceNotFoundException {
+    public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) throws Exception {
         if (id != null) {
-            Employee employee = this.employeeRepository
-                    .findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Laptop not found for this id: " + id));
-            this.employeeRepository.delete(employee);
-            return ResponseEntity.ok().body(HttpStatus.OK);
+            try {
+                String response = this.employeeDAO.deleteEmployee(id);
+                return response.equals("ok")
+                        ? ResponseEntity.ok().body(HttpStatus.OK)
+                        : ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (ResourceNotFoundException e) {
+                return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
     }
