@@ -11,3 +11,12 @@
 }
 
 insert into laptops (employee_id, graphics_card, type, processor, id) values (?, ?, ?, ?, ?)
+
+{
+   "department": {
+        "division": "IT"
+   },
+   "employeeIds": [
+        9
+   ]
+}

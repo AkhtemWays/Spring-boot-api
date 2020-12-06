@@ -27,6 +27,18 @@ public class Employee {
     @OneToMany(mappedBy = "employeeId", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Laptop> laptops = new ArrayList<>();
 
+    public List<Department> getDepartments() {
+        return departments;
+    }
+
+    public void setDepartments(List<Department> departments) {
+        this.departments = departments;
+    }
+
+//    @JsonManagedReference
+    @ManyToMany(mappedBy = "employees",fetch = FetchType.EAGER)
+    private List<Department> departments;
+
     public Employee() {
         super();
     }

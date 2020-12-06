@@ -55,7 +55,7 @@ public class EmployeeDAO {
 
     public Employee getEmployeeById(Long id) {
         try {
-            Session session = this.sessionFactory.openSession();
+            Session session = this.getOpenedSession();
             return session.get(Employee.class, id);
         } catch (Exception e) {
             e.printStackTrace();
