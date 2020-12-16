@@ -1,4 +1,4 @@
-package com.example.demo.shared;
+package com.example.demo.types;
 
 import com.example.demo.model.Department;
 

@@ -1,4 +1,4 @@
-package com.example.demo.shared;
+package com.example.demo.types;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.DAO.EmployeeDAO;
+import com.example.demo.services.EmployeeDAOService;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +16,15 @@ public class EmployeeController {
 
     @GetMapping
     public List<Employee> getAllEmployees() {
-        return this.employeeDAO.getAllEmployees();
+        return this.employeeDAOService.getAllEmployees();
     }
 
     @Autowired
-    private EmployeeDAO employeeDAO;
+    private EmployeeDAOService employeeDAOService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployee(@PathVariable("id") Long id) throws ResourceNotFoundException {
-        Employee employee = this.employeeDAO.getEmployeeById(id);
+        Employee employee = this.employeeDAOService.getEmployeeById(id);
         if (employee == null) {
             throw new ResourceNotFoundException("user not found for this id: " + id);
         }
@@ -35,7 +35,7 @@ public class EmployeeController {
     public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
         Boolean valid = employee.validateSelf();
         if (valid) {
-            this.employeeDAO.createEmployee(employee);
+            this.employeeDAOService.createEmployee(employee);
             return ResponseEntity.ok().body(HttpStatus.CREATED);
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
@@ -46,7 +46,7 @@ public class EmployeeController {
                                             @RequestBody Employee employeeDetails) throws ResourceNotFoundException {
         Boolean valid = employeeDetails.validateSelf();
         if (id != null && valid) {
-            this.employeeDAO.updateEmployee(employeeDetails, id);
+            this.employeeDAOService.updateEmployee(employeeDetails, id);
             return ResponseEntity.ok().body(HttpStatus.OK);
         }
         return ResponseEntity.badRequest().body(HttpStatus.BAD_REQUEST);
@@ -56,7 +56,7 @@ public class EmployeeController {
     public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) throws Exception {
         if (id != null) {
             try {
-                String response = this.employeeDAO.deleteEmployee(id);
+                String response = this.employeeDAOService.deleteEmployee(id);
                 return response.equals("ok")
                         ? ResponseEntity.ok().body(HttpStatus.OK)
                         : ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);

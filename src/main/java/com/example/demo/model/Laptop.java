@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-import com.example.demo.shared.LaptopType;
+import com.example.demo.types.LaptopType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;

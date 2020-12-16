@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.DAO.LaptopsDAO;
+import com.example.demo.services.LaptopsDAOService;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Laptop;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,11 @@ import java.util.List;
 public class LaptopController {
 
     @Autowired
-    private LaptopsDAO laptopDAO;
+    private LaptopsDAOService laptopsDAOService;
 
     @GetMapping
     public ResponseEntity<?> getAllLaptops() {
-        List<Laptop> laptops = this.laptopDAO.getAllLaptops();
+        List<Laptop> laptops = this.laptopsDAOService.getAllLaptops();
         if (laptops == null) {
             return ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -33,7 +33,7 @@ public class LaptopController {
         Boolean valid = laptop.validateSelf();
         if (valid && employeeId != null) {
             try {
-                this.laptopDAO.createLaptop(employeeId, laptop);
+                this.laptopsDAOService.createLaptop(employeeId, laptop);
                 return ResponseEntity.ok().body(HttpStatus.CREATED);
             } catch (EntityNotFoundException e) {
                 e.printStackTrace();
@@ -46,7 +46,7 @@ public class LaptopController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getLaptopById(@PathVariable Long id) throws ResourceNotFoundException {
         if (id != null) {
-            Laptop laptop = this.laptopDAO.getLaptopById(id);
+            Laptop laptop = this.laptopsDAOService.getLaptopById(id);
             if (laptop == null) {
                 throw new ResourceNotFoundException("laptop not found for this id: " + id);
             }
@@ -59,7 +59,7 @@ public class LaptopController {
     public ResponseEntity<?> updateLaptopById(@RequestBody Laptop laptopToUpdate) throws ResourceNotFoundException {
         Boolean valid = laptopToUpdate.validateSelf();
         if (laptopToUpdate.getId() != null && valid) {
-            String response = this.laptopDAO.updateLaptopById(laptopToUpdate);
+            String response = this.laptopsDAOService.updateLaptopById(laptopToUpdate);
             if (response != null && response.equals("OK")) {
                 return ResponseEntity.ok().body(HttpStatus.OK);
             }
@@ -72,7 +72,7 @@ public class LaptopController {
     public ResponseEntity<?> deleteLaptop(@PathVariable("id") Long id) throws Exception {
         if (id != null) {
             try {
-                String response = this.laptopDAO.deleteLaptopById(id);
+                String response = this.laptopsDAOService.deleteLaptopById(id);
                 return response != null && response.equals("OK")
                         ? ResponseEntity.ok().body(HttpStatus.OK)
                         : ResponseEntity.badRequest().body(HttpStatus.INTERNAL_SERVER_ERROR);
